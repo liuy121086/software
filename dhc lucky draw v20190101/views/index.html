@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<title>年会盛典-幸运大奖</title>
+<head>
+<script type="text/javascript" src="static/js/jquery-1.7.2.min.js"></script>
+<script src="static/js/animateNumber.js"></script>
+</head>
+<script language="javascript">
+
+	var g_Interval = 50;
+	var g_Timer;
+	var running = false;
+	var arr = new Array();
+	var sjhxx_xh;
+
+	function beginRndNum(trigger){
+		if(running){
+			zhongjiang(sjhxx_xh);
+			running = false;
+			clearTimeout(g_Timer);	
+			$(trigger).attr('src',"/static/img/cjbg.jpg");
+			$('#ResultNum').css('color','red');
+		}
+		else{
+			running = true;
+			$('#ResultNum').css('color','black');
+			$(trigger).attr('src',"/static/img/cjbg1.jpg");
+			beginTimer();
+		}
+	}
+	
+	function updateRndNum(){
+		var index = Math.floor(Math.random()*arr.length);
+		var num1 = arr[index].Sjh;
+		sjhxx_xh=arr[index].Sjhxx_xh;
+		var numRun4 = $(".numberRun4").numberAnimate({num:num1, speed:50});
+	}
+	
+	function beginTimer(){
+		g_Timer = setTimeout(beat, g_Interval);
+	}
+	
+	function beat() {
+		g_Timer = setTimeout(beat, g_Interval);
+		updateRndNum();
+	}
+
+	function choujiang(){
+	//使用JQuery从后台获取JSON格式的数据
+           $.ajax({
+              type:"post",//请求方式
+              url:"/start.do",//发送请求地址
+              timeout:30000,//超时时间：30秒
+              dataType:"json",//设置返回数据的格式
+              //请求成功后的回调函数 data为json格式
+              success:function(data){
+              	var d = JSON.parse(data);
+                 arr = new Array();
+                 for(var i=0;i<d.length;i++){
+                 	arr[i]=d[i]
+                 }
+                 beginRndNum(document.getElementById("bg"));
+             },
+             //请求出错的处理
+             error:function(){
+                window.clearInterval(timerId);
+                alert("请求出错");
+             }
+          });
+	}
+
+	function zhongjiang(sjhxx_xh){
+	//使用JQuery从后台获取JSON格式的数据
+           $.ajax({
+			type:"post",//请求方式
+			url:"/stop.do?sjhxx_xh="+sjhxx_xh,//发送请求地址
+			timeout:30000,//超时时间：30秒
+			dataType:"json",//设置返回数据的格式
+			//请求成功后的回调函数 data为json格式
+			success:function(data){
+			
+			},
+			//请求出错的处理
+			error:function(){
+			   window.clearInterval(timerId);
+			   alert("请求出错");
+			}
+          });
+	}
+	
+</script>
+<style type="text/css">
+/*数字滚动插件的CSS可调整样式*/
+.mt-number-animate{font-family: SimHei; line-height:55px; height: 55px;/*设置数字显示高度*/; font-size: 55px;/*设置数字大小*/ overflow: hidden; display: inline-block; position: relative; }
+.mt-number-animate .mt-number-animate-dot{ width: 15px;/*设置分割符宽度*/ line-height: 50px; float: left; text-align: center;}
+.mt-number-animate .mt-number-animate-dom{ width: 60px;/*设置单个数字宽度*/ text-align: center; float: left; position: relative; top: 0;}
+.mt-number-animate .mt-number-animate-dom .mt-number-animate-span{ width: 100%; float: left;}
+body{
+	background-color: #5a0003;
+}
+#bg{
+	position:absolute;
+	 left:300px; /*左右位置*/
+	 z-index:1;
+}
+#ResultNum {
+	 position:absolute;
+	 left:505px; /* 左右位置*/
+	 top:468px;/*上下位置*/
+	 z-index:2;
+	 font-size:55pt;
+	 font-family:SimHei;
+	 letter-spacing:24px;
+}
+.aligncenter { 
+	clear: both; 
+	display: block; 
+	margin:auto; 
+}
+</style>
+</head>
+<body topmargin="50">
+<img id="bg" src="/static/img/cjbg.jpg" class="aligncenter"  usemap="#Map"/>
+<map name="Map" id="Map">
+	<area shape="rect" coords="281,339,469,390"  href="javascript:choujiang();"/>
+</map>
+<div id="ResultNum" class="numberRun4">******</div>
+</body>
+</html>
